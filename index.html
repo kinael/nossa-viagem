@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Planejador da Viagem ao Chile 2026 🇨🇱</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+    >
+
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Header / Hero -->
+    <header class="hero-chile py-4 mb-4">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <h1 class="hero-title mb-2">
+                        Planejador da Viagem ao Chile 2026
+                    </h1>
+                    <p class="hero-subtitle mb-0">
+                        Organize seus gastos, meta de economia e acompanhe tudo para julho/agosto de 2026.
+                    </p>
+                </div>
+                <div class="col-md-4 d-flex justify-content-md-end justify-content-center">
+                    <!-- Bandeira do Chile feita em CSS -->
+                    <div class="chile-flag shadow-lg" aria-label="Bandeira do Chile"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <main class="container pb-5">
+
+        <!-- Cards de resumo rápidos -->
+        <section class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card card-glass h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-2">
+                                💸 Custo total previsto
+                            </h5>
+                            <p class="card-text text-muted mb-2">
+                                Soma de todos os gastos planejados para a viagem.
+                            </p>
+                            <p class="display-6 fw-bold mb-0" id="custoTotalViagem">
+                                R$ 0,00
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card card-glass h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-2">
+                                🎯 Progresso da meta de economia
+                            </h5>
+                            <p class="card-text text-muted mb-2">
+                                Acompanhe o quanto você já juntou para a viagem.
+                            </p>
+                            <div class="d-flex align-items-baseline justify-content-between gap-2">
+                                <div>
+                                    <small class="text-muted d-block">Você já alcançou</small>
+                                    <span class="fw-bold fs-4" id="percentualMetaTopo">0%</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">Faltam</small>
+                                    <span class="fw-bold fs-5" id="faltaMetaTopo">R$ 0,00</span>
+                                </div>
+                            </div>
+                            <div class="progress mt-3" style="height: 10px;">
+                                <div class="progress-bar" id="barraProgressoTopo"
+                                     role="progressbar"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"
+                                     aria-valuenow="0"
+                                     style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navegação visual das seções -->
+        <section class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <a href="#sec-gastos" class="text-decoration-none">
+                        <div class="card card-link h-100">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="icon-circle">
+                                    💰
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">Gastos da viagem</h5>
+                                    <p class="card-text mb-0 text-muted">
+                                        Adicione, edite e remova todos os gastos planejados.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-6">
+                    <a href="#sec-meta" class="text-decoration-none">
+                        <div class="card card-link h-100">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="icon-circle">
+                                    🏦
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">Meta de economia</h5>
+                                    <p class="card-text mb-0 text-muted">
+                                        Defina a meta, registre o que já juntou e acompanhe o progresso.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Seção de gastos da viagem -->
+        <section id="sec-gastos" class="mb-5">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <h2 class="section-title mb-0">Gastos da viagem</h2>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                    Controle detalhado
+                </span>
+            </div>
+
+            <div class="row g-4">
+                <!-- Formulário para adicionar gastos -->
+                <div class="col-lg-4">
+                    <div class="card card-glass h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Adicionar gasto</h5>
+                            <form id="gastoForm">
+                                <div class="mb-3">
+                                    <label for="descricaoGasto" class="form-label">Descrição</label>
+                                    <input type="text" class="form-control" id="descricaoGasto"
+                                           placeholder="Ex.: Passagem aérea, hotel, seguro viagem"
+                                           required>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label for="quantidadeGasto" class="form-label">Quantidade</label>
+                                        <input type="number" class="form-control" id="quantidadeGasto"
+                                               min="1" step="1" value="1" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="valorUnitarioGasto" class="form-label">Valor unitário (R$)</label>
+                                        <input type="number" class="form-control" id="valorUnitarioGasto"
+                                               min="0" step="0.01" value="0" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="subtotalGasto" class="form-label">Subtotal (calculado)</label>
+                                    <input type="text" class="form-control" id="subtotalGasto"
+                                           readonly value="R$ 0,00">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">
+                                    + Adicionar gasto
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de gastos -->
+                <div class="col-lg-8">
+                    <div class="card card-glass h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Lista de gastos</h5>
+                                <small class="text-muted">
+                                    Tudo é salvo automaticamente no seu navegador.
+                                </small>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th class="text-center">Qtd.</th>
+                                        <th class="text-end">Valor unitário</th>
+                                        <th class="text-end">Subtotal</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="tabelaGastosBody">
+                                    <!-- Linhas inseridas via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3 text-end">
+                                <span class="text-muted me-2">Custo total previsto:</span>
+                                <span class="fw-bold fs-5" id="custoTotalViagemTabela">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de meta de economia -->
+        <section id="sec-meta" class="mb-5">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <h2 class="section-title mb-0">Meta de economia</h2>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                    Foco na viagem!
+                </span>
+            </div>
+
+            <div class="row g-4">
+                <!-- Formulário Meta + Valor Juntado -->
+                <div class="col-lg-5">
+                    <div class="card card-glass h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Configurar meta</h5>
+
+                            <div class="mb-3">
+                                <label for="metaTotal" class="form-label">Meta total da viagem (R$)</label>
+                                <input type="number" class="form-control" id="metaTotal"
+                                       min="0" step="0.01" placeholder="Ex.: 10000">
+                                <small class="text-muted">
+                                    Quanto você quer juntar até julho/agosto de 2026.
+                                </small>
+                            </div>
+                            <button class="btn btn-outline-primary w-100 mb-4" id="btnSalvarMeta">
+                                Salvar / Atualizar meta
+                            </button>
+
+                            <h5 class="card-title mb-3">Valor já juntado</h5>
+                            <div class="mb-3">
+                                <label for="valorJuntado" class="form-label">Quanto você já juntou (R$)</label>
+                                <input type="number" class="form-control" id="valorJuntado"
+                                       min="0" step="0.01" placeholder="Ex.: 3500">
+                                <small class="text-muted">
+                                    Some todas as economias reservadas para esta viagem.
+                                </small>
+                            </div>
+                            <button class="btn btn-success w-100" id="btnSalvarValorJuntado">
+                                Salvar / Atualizar valor juntado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo visual da meta -->
+                <div class="col-lg-7">
+                    <div class="card card-glass h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">Seu progresso</h5>
+                                    <p class="text-muted mb-0">
+                                        Acompanhe como está a sua jornada rumo ao Chile!
+                                    </p>
+                                </div>
+                                <span class="badge bg-primary text-white fs-6" id="percentualMetaBadge">
+                                    0%
+                                </span>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <div class="meta-stat">
+                                        <small class="text-muted d-block">Meta total</small>
+                                        <span class="fw-bold fs-5" id="metaTotalTexto">R$ 0,00</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="meta-stat">
+                                        <small class="text-muted d-block">Já juntado</small>
+                                        <span class="fw-bold fs-5" id="valorJuntadoTexto">R$ 0,00</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="meta-stat">
+                                        <small class="text-muted d-block">Ainda falta</small>
+                                        <span class="fw-bold fs-5" id="faltaMetaTexto">R$ 0,00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="progress progress-lg">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                         id="barraProgresso"
+                                         role="progressbar"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         aria-valuenow="0"
+                                         style="width: 0%;">
+                                    </div>
+                                </div>
+                                <small class="text-muted d-block mt-1" id="textoPercentualMeta">
+                                    Você já alcançou 0% da meta.
+                                </small>
+                            </div>
+
+                            <div class="alert alert-light border mt-auto mb-0" id="mensagemMetaMotivacional">
+                                Defina uma meta e um valor já juntado para ver sua barra de progresso.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de edição de gasto -->
+    <div class="modal fade" id="modalEditarGasto" tabindex="-1" aria-labelledby="modalEditarGastoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarGastoLabel">Editar gasto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditarGasto">
+                        <input type="hidden" id="editarIdGasto">
+                        <div class="mb-3">
+                            <label for="editarDescricaoGasto" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="editarDescricaoGasto" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label for="editarQuantidadeGasto" class="form-label">Quantidade</label>
+                                <input type="number" class="form-control" id="editarQuantidadeGasto"
+                                       min="1" step="1" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="editarValorUnitarioGasto" class="form-label">Valor unitário (R$)</label>
+                                <input type="number" class="form-control" id="editarValorUnitarioGasto"
+                                       min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarSubtotalGasto" class="form-label">Subtotal (calculado)</label>
+                            <input type="text" class="form-control" id="editarSubtotalGasto" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSalvarEdicaoGasto">Salvar alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (com Popper) -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"
+    ></script>
+
+    <!-- Script da aplicação -->
+    <script src="script.js"></script>
+</body>
+</html>
