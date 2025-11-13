@@ -1,447 +1,345 @@
-// ==============================================
-// Utilidades de formatação
-// ==============================================
+// -------------------------------
+// Configurações de LocalStorage
+// -------------------------------
+const LS_KEYS = {
+  GASTOS: "chile_gastos_2026",
+  META: "chile_meta_total_2026",
+  JUNTADO: "chile_valor_juntado_2026"
+};
 
-// Formata número em moeda brasileira
+// -------------------------------
+// Estado em memória
+// -------------------------------
+let gastos = [];            // Lista de gastos
+let gastoEmEdicaoId = null; // ID do gasto em edição (ou null)
+
+// -------------------------------
+// Utilidades
+// -------------------------------
+
+// Formata número como moeda BRL
 function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    });
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
 }
 
-// Formata número em percentual com 1 casa
-function formatarPercentual(valor) {
-    return valor.toLocaleString('pt-BR', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 1
-    }) + '%';
+// Lê um número de um input com segurança
+function lerNumeroDeInput(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const raw = (el.value || "").toString().replace(",", ".");
+  const num = parseFloat(raw);
+  return isNaN(num) ? 0 : num;
 }
 
-// ==============================================
-// Estado e chaves do localStorage
-// ==============================================
+// -------------------------------
+// LocalStorage helpers
+// -------------------------------
+function carregarDoLocalStorage() {
+  const gastosLS = localStorage.getItem(LS_KEYS.GASTOS);
+  const metaLS = localStorage.getItem(LS_KEYS.META);
+  const juntadoLS = localStorage.getItem(LS_KEYS.JUNTADO);
 
-const LS_GASTOS_KEY = 'chileTripGastos';
-const LS_META_KEY = 'chileTripMeta';
-const LS_VALOR_JUNTADO_KEY = 'chileTripValorJuntado';
+  gastos = gastosLS ? JSON.parse(gastosLS) : [];
 
-let gastos = [];        // Lista de gastos
-let metaTotal = 0;      // Meta de economia
-let valorJuntado = 0;   // Valor já economizado
+  if (metaLS !== null) {
+    document.getElementById("metaTotal").value = parseFloat(metaLS);
+  }
 
-// Modal de edição (Bootstrap)
-let modalEditarGasto = null;
-
-// ==============================================
-// Inicialização
-// ==============================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Carrega dados do localStorage
-    carregarGastosDoLocalStorage();
-    carregarMetaDoLocalStorage();
-    carregarValorJuntadoDoLocalStorage();
-
-    // Inicializa modal de edição
-    const modalEl = document.getElementById('modalEditarGasto');
-    if (modalEl) {
-        modalEditarGasto = new bootstrap.Modal(modalEl);
-    }
-
-    // Liga eventos do formulário de novo gasto
-    inicializarFormularioGasto();
-
-    // Liga eventos da meta e valor juntado
-    inicializarMetaEconomia();
-
-    // Renderiza tudo com os dados carregados
-    renderizarTabelaGastos();
-    atualizarResumoGastos();
-    atualizarResumoMeta();
-});
-
-// ==============================================
-// LocalStorage - carregar e salvar
-// ==============================================
-
-function carregarGastosDoLocalStorage() {
-    try {
-        const dados = localStorage.getItem(LS_GASTOS_KEY);
-        gastos = dados ? JSON.parse(dados) : [];
-    } catch (e) {
-        console.error('Erro ao ler gastos do localStorage:', e);
-        gastos = [];
-    }
+  if (juntadoLS !== null) {
+    document.getElementById("valorJuntado").value = parseFloat(juntadoLS);
+  }
 }
 
 function salvarGastosNoLocalStorage() {
-    localStorage.setItem(LS_GASTOS_KEY, JSON.stringify(gastos));
-}
-
-function carregarMetaDoLocalStorage() {
-    const valor = localStorage.getItem(LS_META_KEY);
-    metaTotal = valor ? parseFloat(valor) : 0;
-
-    const inputMeta = document.getElementById('metaTotal');
-    if (inputMeta) {
-        inputMeta.value = metaTotal ? metaTotal : '';
-    }
+  localStorage.setItem(LS_KEYS.GASTOS, JSON.stringify(gastos));
 }
 
 function salvarMetaNoLocalStorage() {
-    localStorage.setItem(LS_META_KEY, metaTotal.toString());
+  const meta = lerNumeroDeInput("metaTotal");
+  localStorage.setItem(LS_KEYS.META, meta);
 }
 
-function carregarValorJuntadoDoLocalStorage() {
-    const valor = localStorage.getItem(LS_VALOR_JUNTADO_KEY);
-    valorJuntado = valor ? parseFloat(valor) : 0;
-
-    const inputJuntado = document.getElementById('valorJuntado');
-    if (inputJuntado) {
-        inputJuntado.value = valorJuntado ? valorJuntado : '';
-    }
+function salvarJuntadoNoLocalStorage() {
+  const juntado = lerNumeroDeInput("valorJuntado");
+  localStorage.setItem(LS_KEYS.JUNTADO, juntado);
 }
 
-function salvarValorJuntadoNoLocalStorage() {
-    localStorage.setItem(LS_VALOR_JUNTADO_KEY, valorJuntado.toString());
-}
-
-// ==============================================
-// Formulário de novo gasto
-// ==============================================
-
-function inicializarFormularioGasto() {
-    const form = document.getElementById('gastoForm');
-    const inputDescricao = document.getElementById('descricaoGasto');
-    const inputQtd = document.getElementById('quantidadeGasto');
-    const inputValorUnitario = document.getElementById('valorUnitarioGasto');
-    const inputSubtotal = document.getElementById('subtotalGasto');
-
-    // Calcula subtotal conforme usuário digita
-    const calcularSubtotalFormulario = () => {
-        const qtd = parseInt(inputQtd.value) || 0;
-        const valorUnitario = parseFloat(inputValorUnitario.value) || 0;
-        const subtotal = qtd * valorUnitario;
-        inputSubtotal.value = formatarMoeda(isFinite(subtotal) ? subtotal : 0);
-    };
-
-    inputQtd.addEventListener('input', calcularSubtotalFormulario);
-    inputValorUnitario.addEventListener('input', calcularSubtotalFormulario);
-    calcularSubtotalFormulario();
-
-    // Ao enviar o formulário, adiciona o gasto
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const descricao = (inputDescricao.value || '').trim();
-        const qtd = parseInt(inputQtd.value);
-        const valorUnitario = parseFloat(inputValorUnitario.value);
-
-        if (!descricao || !qtd || isNaN(qtd) || isNaN(valorUnitario)) {
-            alert('Preencha todos os campos corretamente para adicionar um gasto.');
-            return;
-        }
-
-        const novoGasto = {
-            id: Date.now(), // ID simples baseado no timestamp
-            descricao,
-            quantidade: qtd,
-            valorUnitario,
-        };
-        novoGasto.subtotal = novoGasto.quantidade * novoGasto.valorUnitario;
-
-        gastos.push(novoGasto);
-        salvarGastosNoLocalStorage();
-        renderizarTabelaGastos();
-        atualizarResumoGastos();
-
-        // Limpa o formulário
-        form.reset();
-        inputQtd.value = 1;
-        inputValorUnitario.value = 0;
-        calcularSubtotalFormulario();
-        inputDescricao.focus();
-    });
-}
-
-// ==============================================
-// Renderização da tabela de gastos
-// ==============================================
-
+// -------------------------------
+// Gastos: renderização da tabela
+// -------------------------------
 function renderizarTabelaGastos() {
-    const tbody = document.getElementById('tabelaGastosBody');
-    if (!tbody) return;
+  const tbody = document.querySelector("#tabelaGastos tbody");
+  tbody.innerHTML = "";
 
-    // Limpa conteúdo anterior
-    tbody.innerHTML = '';
+  gastos.forEach((gasto) => {
+    const tr = document.createElement("tr");
 
-    if (!gastos.length) {
-        const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 5;
-        td.className = 'text-center text-muted py-4';
-        td.textContent = 'Nenhum gasto cadastrado ainda. Comece adicionando seu primeiro gasto da viagem!';
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-        return;
+    const tdDesc = document.createElement("td");
+    tdDesc.textContent = gasto.descricao;
+
+    const tdQtd = document.createElement("td");
+    tdQtd.classList.add("text-center");
+    tdQtd.textContent = gasto.quantidade;
+
+    const tdUnit = document.createElement("td");
+    tdUnit.classList.add("text-end");
+    tdUnit.textContent = formatarMoeda(gasto.valorUnitario);
+
+    const tdSubtotal = document.createElement("td");
+    tdSubtotal.classList.add("text-end");
+    tdSubtotal.textContent = formatarMoeda(gasto.subtotal);
+
+    const tdAcoes = document.createElement("td");
+    tdAcoes.classList.add("text-center");
+
+    // Botão Editar
+    const btnEditar = document.createElement("button");
+    btnEditar.className = "btn btn-sm btn-outline-primary me-1";
+    btnEditar.textContent = "Editar";
+    btnEditar.addEventListener("click", () => iniciarEdicaoGasto(gasto.id));
+
+    // Botão Remover
+    const btnRemover = document.createElement("button");
+    btnRemover.className = "btn btn-sm btn-outline-danger";
+    btnRemover.textContent = "Remover";
+    btnRemover.addEventListener("click", () => removerGasto(gasto.id));
+
+    tdAcoes.appendChild(btnEditar);
+    tdAcoes.appendChild(btnRemover);
+
+    tr.appendChild(tdDesc);
+    tr.appendChild(tdQtd);
+    tr.appendChild(tdUnit);
+    tr.appendChild(tdSubtotal);
+    tr.appendChild(tdAcoes);
+
+    tbody.appendChild(tr);
+  });
+
+  atualizarTotalGastos();
+}
+
+// -------------------------------
+// Gastos: operações CRUD
+// -------------------------------
+function adicionarOuAtualizarGasto(event) {
+  event.preventDefault();
+
+  const descricaoInput = document.getElementById("descricaoGasto");
+  const quantidadeInput = document.getElementById("quantidadeGasto");
+  const valorUnitarioInput = document.getElementById("valorUnitarioGasto");
+
+  const descricao = descricaoInput.value.trim();
+  const quantidade = parseInt(quantidadeInput.value, 10) || 0;
+  const valorUnitario = parseFloat(
+    (valorUnitarioInput.value || "").toString().replace(",", ".")
+  ) || 0;
+  const subtotal = quantidade * valorUnitario;
+
+  if (!descricao || quantidade <= 0 || valorUnitario < 0) {
+    alert("Preencha a descrição, quantidade (>=1) e valor unitário corretamente.");
+    return;
+  }
+
+  if (gastoEmEdicaoId) {
+    // Atualizar gasto existente
+    const index = gastos.findIndex((g) => g.id === gastoEmEdicaoId);
+    if (index !== -1) {
+      gastos[index].descricao = descricao;
+      gastos[index].quantidade = quantidade;
+      gastos[index].valorUnitario = valorUnitario;
+      gastos[index].subtotal = subtotal;
     }
-
-    gastos.forEach((gasto) => {
-        const tr = document.createElement('tr');
-
-        const tdDescricao = document.createElement('td');
-        tdDescricao.textContent = gasto.descricao;
-
-        const tdQtd = document.createElement('td');
-        tdQtd.className = 'text-center';
-        tdQtd.textContent = gasto.quantidade;
-
-        const tdValorUnitario = document.createElement('td');
-        tdValorUnitario.className = 'text-end';
-        tdValorUnitario.textContent = formatarMoeda(gasto.valorUnitario);
-
-        const tdSubtotal = document.createElement('td');
-        tdSubtotal.className = 'text-end fw-semibold';
-        tdSubtotal.textContent = formatarMoeda(gasto.subtotal);
-
-        const tdAcoes = document.createElement('td');
-        tdAcoes.className = 'text-center';
-
-        const btnEditar = document.createElement('button');
-        btnEditar.className = 'btn btn-sm btn-outline-primary btn-acao me-1';
-        btnEditar.textContent = 'Editar';
-        btnEditar.addEventListener('click', () => abrirModalEdicaoGasto(gasto.id));
-
-        const btnRemover = document.createElement('button');
-        btnRemover.className = 'btn btn-sm btn-outline-danger btn-acao';
-        btnRemover.textContent = 'Remover';
-        btnRemover.addEventListener('click', () => removerGasto(gasto.id));
-
-        tdAcoes.appendChild(btnEditar);
-        tdAcoes.appendChild(btnRemover);
-
-        tr.appendChild(tdDescricao);
-        tr.appendChild(tdQtd);
-        tr.appendChild(tdValorUnitario);
-        tr.appendChild(tdSubtotal);
-        tr.appendChild(tdAcoes);
-
-        tbody.appendChild(tr);
-    });
-}
-
-// ==============================================
-// Resumo de gastos / custo total
-// ==============================================
-
-function atualizarResumoGastos() {
-    const custoTotal = gastos.reduce((total, gasto) => total + (gasto.subtotal || 0), 0);
-
-    const spanTopo = document.getElementById('custoTotalViagem');
-    const spanTabela = document.getElementById('custoTotalViagemTabela');
-    if (spanTopo) spanTopo.textContent = formatarMoeda(custoTotal);
-    if (spanTabela) spanTabela.textContent = formatarMoeda(custoTotal);
-}
-
-// ==============================================
-// Edição de gasto
-// ==============================================
-
-function abrirModalEdicaoGasto(idGasto) {
-    const gasto = gastos.find((g) => g.id === idGasto);
-    if (!gasto) return;
-
-    const inputId = document.getElementById('editarIdGasto');
-    const inputDescricao = document.getElementById('editarDescricaoGasto');
-    const inputQtd = document.getElementById('editarQuantidadeGasto');
-    const inputValorUnitario = document.getElementById('editarValorUnitarioGasto');
-    const inputSubtotal = document.getElementById('editarSubtotalGasto');
-
-    inputId.value = gasto.id;
-    inputDescricao.value = gasto.descricao;
-    inputQtd.value = gasto.quantidade;
-    inputValorUnitario.value = gasto.valorUnitario;
-    inputSubtotal.value = formatarMoeda(gasto.subtotal);
-
-    const atualizarSubtotalEdicao = () => {
-        const qtd = parseInt(inputQtd.value) || 0;
-        const valorUnitario = parseFloat(inputValorUnitario.value) || 0;
-        const subtotal = qtd * valorUnitario;
-        inputSubtotal.value = formatarMoeda(isFinite(subtotal) ? subtotal : 0);
+  } else {
+    // Criar novo gasto
+    const novoGasto = {
+      id: Date.now(), // ID simples baseado em timestamp
+      descricao,
+      quantidade,
+      valorUnitario,
+      subtotal
     };
+    gastos.push(novoGasto);
+  }
 
-    inputQtd.oninput = atualizarSubtotalEdicao;
-    inputValorUnitario.oninput = atualizarSubtotalEdicao;
-
-    atualizarSubtotalEdicao();
-
-    if (modalEditarGasto) {
-        modalEditarGasto.show();
-    }
+  salvarGastosNoLocalStorage();
+  renderizarTabelaGastos();
+  resetarFormularioGastos();
 }
 
-// Botão de salvar dentro do modal
-const btnSalvarEdicao = document.getElementById('btnSalvarEdicaoGasto');
-if (btnSalvarEdicao) {
-    btnSalvarEdicao.addEventListener('click', () => {
-        const inputId = document.getElementById('editarIdGasto');
-        const inputDescricao = document.getElementById('editarDescricaoGasto');
-        const inputQtd = document.getElementById('editarQuantidadeGasto');
-        const inputValorUnitario = document.getElementById('editarValorUnitarioGasto');
+function iniciarEdicaoGasto(id) {
+  const gasto = gastos.find((g) => g.id === id);
+  if (!gasto) return;
 
-        const id = parseInt(inputId.value);
-        const descricao = (inputDescricao.value || '').trim();
-        const qtd = parseInt(inputQtd.value);
-        const valorUnitario = parseFloat(inputValorUnitario.value);
+  gastoEmEdicaoId = id;
 
-        if (!descricao || !qtd || isNaN(qtd) || isNaN(valorUnitario)) {
-            alert('Preencha todos os campos corretamente para salvar a edição.');
-            return;
-        }
+  // Preenche o formulário com os dados do gasto
+  document.getElementById("descricaoGasto").value = gasto.descricao;
+  document.getElementById("quantidadeGasto").value = gasto.quantidade;
+  document.getElementById("valorUnitarioGasto").value = gasto.valorUnitario;
 
-        const index = gastos.findIndex((g) => g.id === id);
-        if (index === -1) return;
+  atualizarSubtotalPreview();
 
-        gastos[index].descricao = descricao;
-        gastos[index].quantidade = qtd;
-        gastos[index].valorUnitario = valorUnitario;
-        gastos[index].subtotal = qtd * valorUnitario;
-
-        salvarGastosNoLocalStorage();
-        renderizarTabelaGastos();
-        atualizarResumoGastos();
-
-        if (modalEditarGasto) {
-            modalEditarGasto.hide();
-        }
-    });
+  // Alterar texto do botão
+  document.getElementById("btnSalvarGasto").textContent = "Salvar edição";
+  document.getElementById("btnCancelarEdicao").classList.remove("d-none");
 }
 
-// ==============================================
-// Remoção de gasto
-// ==============================================
-
-function removerGasto(idGasto) {
-    const confirmar = window.confirm('Tem certeza de que deseja remover este gasto?');
-    if (!confirmar) return;
-
-    gastos = gastos.filter((g) => g.id !== idGasto);
-    salvarGastosNoLocalStorage();
-    renderizarTabelaGastos();
-    atualizarResumoGastos();
+function resetarFormularioGastos() {
+  document.getElementById("gastoForm").reset();
+  document.getElementById("quantidadeGasto").value = 1;
+  document.getElementById("subtotalPreview").value = "";
+  gastoEmEdicaoId = null;
+  document.getElementById("btnSalvarGasto").textContent = "Adicionar gasto";
+  document.getElementById("btnCancelarEdicao").classList.add("d-none");
 }
 
-// ==============================================
+function removerGasto(id) {
+  if (!confirm("Deseja realmente remover este gasto?")) return;
+
+  gastos = gastos.filter((g) => g.id !== id);
+  salvarGastosNoLocalStorage();
+  renderizarTabelaGastos();
+}
+
+// Atualiza o total geral dos gastos
+function atualizarTotalGastos() {
+  const total = gastos.reduce((soma, g) => soma + g.subtotal, 0);
+  document.getElementById("totalGastos").textContent = formatarMoeda(total);
+}
+
+// Atualiza o preview de subtotal no formulário de gasto
+function atualizarSubtotalPreview() {
+  const qtd = parseInt(document.getElementById("quantidadeGasto").value, 10) || 0;
+  const valorUnit = parseFloat(
+    (document.getElementById("valorUnitarioGasto").value || "")
+      .toString()
+      .replace(",", ".")
+  ) || 0;
+  const subtotal = qtd * valorUnit;
+
+  document.getElementById("subtotalPreview").value =
+    subtotal > 0 ? formatarMoeda(subtotal) : "";
+}
+
+// -------------------------------
 // Meta de economia
-// ==============================================
-
-function inicializarMetaEconomia() {
-    const btnSalvarMeta = document.getElementById('btnSalvarMeta');
-    const btnSalvarValorJuntado = document.getElementById('btnSalvarValorJuntado');
-
-    if (btnSalvarMeta) {
-        btnSalvarMeta.addEventListener('click', () => {
-            const inputMeta = document.getElementById('metaTotal');
-            const valor = parseFloat(inputMeta.value);
-            metaTotal = !isNaN(valor) && valor >= 0 ? valor : 0;
-            salvarMetaNoLocalStorage();
-            atualizarResumoMeta();
-        });
-    }
-
-    if (btnSalvarValorJuntado) {
-        btnSalvarValorJuntado.addEventListener('click', () => {
-            const inputJuntado = document.getElementById('valorJuntado');
-            const valor = parseFloat(inputJuntado.value);
-            valorJuntado = !isNaN(valor) && valor >= 0 ? valor : 0;
-            salvarValorJuntadoNoLocalStorage();
-            atualizarResumoMeta();
-        });
-    }
-}
-
-// Atualiza todos os elementos relacionados à meta
+// -------------------------------
 function atualizarResumoMeta() {
-    const metaTexto = document.getElementById('metaTotalTexto');
-    const juntadoTexto = document.getElementById('valorJuntadoTexto');
-    const faltaTexto = document.getElementById('faltaMetaTexto');
-    const textoPercentual = document.getElementById('textoPercentualMeta');
-    const badgePercentual = document.getElementById('percentualMetaBadge');
-    const barraProgresso = document.getElementById('barraProgresso');
-    const mensagemMeta = document.getElementById('mensagemMetaMotivacional');
+  const meta = lerNumeroDeInput("metaTotal");
+  const juntado = lerNumeroDeInput("valorJuntado");
 
-    const percentualTopo = document.getElementById('percentualMetaTopo');
-    const faltaTopo = document.getElementById('faltaMetaTopo');
-    const barraTopo = document.getElementById('barraProgressoTopo');
+  // pega os elementos da seção de meta
+  const percentualMetaEl = document.getElementById("percentualMeta");
+  const barra = document.getElementById("barraProgresso");
+  const mensagemEl = document.getElementById("mensagemMeta");
+  const quantoFaltaEl = document.getElementById("quantoFalta");
 
-    // Atualiza valores numéricos
-    if (metaTexto) metaTexto.textContent = formatarMoeda(metaTotal || 0);
-    if (juntadoTexto) juntadoTexto.textContent = formatarMoeda(valorJuntado || 0);
+  // se algum não existir, não quebra o JS
+  if (!percentualMetaEl || !barra || !mensagemEl || !quantoFaltaEl) {
+    console.warn("Elementos da seção Meta não encontrados no HTML.");
+    return;
+  }
 
-    let percentual = 0;
-    let falta = 0;
+  const percentual = meta > 0 ? Math.min((juntado / meta) * 100, 999) : 0;
+  const percentualFormatado = isNaN(percentual) ? 0 : percentual;
 
-    if (metaTotal > 0) {
-        percentual = (valorJuntado / metaTotal) * 100;
-        if (!isFinite(percentual)) percentual = 0;
-        if (percentual < 0) percentual = 0;
-        if (percentual > 999) percentual = 999;
+  // Atualiza texto de percentual
+  percentualMetaEl.textContent = `${percentualFormatado.toFixed(1)}%`;
 
-        falta = metaTotal - valorJuntado;
-        if (falta < 0) falta = 0;
-    } else {
-        percentual = 0;
-        falta = 0;
-    }
+  // Atualiza barra de progresso (limite visual até 100)
+  const valorBarra = Math.min(percentualFormatado, 100);
+  barra.style.width = `${valorBarra}%`;
+  barra.setAttribute("aria-valuenow", valorBarra.toFixed(1));
 
-    if (faltaTexto) faltaTexto.textContent = formatarMoeda(falta);
-    if (faltaTopo) faltaTopo.textContent = formatarMoeda(falta);
+  if (meta <= 0) {
+    mensagemEl.textContent =
+      "Defina um valor de meta para começar a acompanhar.";
+    quantoFaltaEl.textContent =
+      "Ainda faltam R$ 0,00 para alcançar a meta!";
+    return;
+  }
 
-    const percentualFormatado = formatarPercentual(percentual);
+  if (juntado <= 0) {
+    mensagemEl.textContent =
+      "Ainda não começamos a juntar :(";
+  } else if (juntado < meta) {
+    mensagemEl.textContent =
+      "Começamos!! foguete não tem ré";
+  } else if (juntado === meta) {
+    mensagemEl.textContent =
+      "BATEU A META CARAI!!!!!!!!!!!!!!! VAMOOOOOO";
+  } else if (juntado > meta) {
+    mensagemEl.textContent =
+      "PQP A GENTE SUPEROU A META, SOMOS FODAS";
+  }
 
-    if (textoPercentual) {
-        textoPercentual.textContent = `Você já alcançou ${percentualFormatado} da meta.`;
-    }
+  const falta = meta - juntado;
+  const faltaFormatado = falta > 0 ? falta : 0;
 
-    if (badgePercentual) {
-        badgePercentual.textContent = percentualFormatado;
-    }
-
-    if (percentualTopo) {
-        percentualTopo.textContent = percentualFormatado;
-    }
-
-    // Barras de progresso
-    const larguraBarra = Math.min(percentual, 100);
-
-    if (barraProgresso) {
-        barraProgresso.style.width = `${larguraBarra}%`;
-        barraProgresso.setAttribute('aria-valuenow', larguraBarra.toString());
-    }
-
-    if (barraTopo) {
-        barraTopo.style.width = `${larguraBarra}%`;
-        barraTopo.setAttribute('aria-valuenow', larguraBarra.toString());
-    }
-
-    // Mensagem motivacional
-    if (mensagemMeta) {
-        if (metaTotal <= 0) {
-            mensagemMeta.className = 'alert alert-light border mt-auto mb-0';
-            mensagemMeta.textContent = 'Defina uma meta e um valor já juntado para ver sua barra de progresso.';
-        } else if (valorJuntado <= 0) {
-            mensagemMeta.className = 'alert alert-info mt-auto mb-0';
-            mensagemMeta.textContent = 'Meta definida! Comece a reservar um valor para a viagem ao Chile.';
-        } else if (percentual >= 100) {
-            mensagemMeta.className = 'alert alert-success mt-auto mb-0';
-            mensagemMeta.textContent = 'Parabéns! Você alcançou (ou até ultrapassou) a sua meta de economia para a viagem! 🇨🇱';
-        } else if (percentual >= 50) {
-            mensagemMeta.className = 'alert alert-success mt-auto mb-0';
-            mensagemMeta.textContent = 'Você já passou da metade da meta, continue assim que o Chile está logo ali!';
-        } else {
-            mensagemMeta.className = 'alert alert-primary mt-auto mb-0';
-            mensagemMeta.textContent = 'Boa! Você já começou a juntar. Mantenha o ritmo que você chega na meta a tempo.';
-        }
-    }
+  if (falta > 0) {
+    quantoFaltaEl.textContent = `Ainda faltam ${formatarMoeda(
+      faltaFormatado
+    )} para alcançar a meta.`;
+  } else {
+    quantoFaltaEl.textContent =
+      "Meta alcançada!!!!!!!";
+  }
 }
+
+
+// -------------------------------
+// Eventos da meta
+// -------------------------------
+function configurarEventosMeta() {
+  const btnMeta = document.getElementById("btnSalvarMeta");
+  const btnJuntado = document.getElementById("btnSalvarJuntado");
+
+  btnMeta.addEventListener("click", () => {
+    salvarMetaNoLocalStorage();
+    atualizarResumoMeta();
+  });
+
+  btnJuntado.addEventListener("click", () => {
+    salvarJuntadoNoLocalStorage();
+    atualizarResumoMeta();
+  });
+}
+
+// -------------------------------
+// Inicialização
+// -------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("Chile 2026 – painel carregado ✅");
+
+  // Carrega dados salvos
+  carregarDoLocalStorage();
+
+  // Renderiza tabela de gastos e total
+  renderizarTabelaGastos();
+
+  // Atualiza resumo da meta
+  atualizarResumoMeta();
+
+  // Eventos do formulário de gasto
+  const formGasto = document.getElementById("gastoForm");
+  formGasto.addEventListener("submit", adicionarOuAtualizarGasto);
+
+  document
+    .getElementById("quantidadeGasto")
+    .addEventListener("input", atualizarSubtotalPreview);
+  document
+    .getElementById("valorUnitarioGasto")
+    .addEventListener("input", atualizarSubtotalPreview);
+
+  // Botão cancelar edição
+  document
+    .getElementById("btnCancelarEdicao")
+    .addEventListener("click", resetarFormularioGastos);
+
+  // Eventos da meta
+  configurarEventosMeta();
+});
