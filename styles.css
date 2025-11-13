@@ -1,191 +1,268 @@
-/* ===========================
-   Estilos gerais
-   =========================== */
+:root {
+  --chile-red: #e63946;
+  --chile-blue: #1d3557;
+  --chile-light: #f1faee;
+  --chile-soft: #edf2f4;
+  --chile-accent: #ffb703;
+}
 
+/* Fonte geral */
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: radial-gradient(circle at top, #f3f4ff 0, #f8fafc 35%, #fdf2f8 100%);
-    color: #1f2933;
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #f0f4ff 0, #f8fafc 40%, #ffffff 100%);
+  color: #1f2933;
+  margin: 0;
 }
 
-/* Remove foco "feio" padrão, mas mantém acessibilidade */
-:focus-visible {
-    outline: 2px solid #2563eb;
-    outline-offset: 2px;
-}
-
-/* ===========================
-   Hero / Header
-   =========================== */
-
-.hero-chile {
-    background: linear-gradient(120deg, #0b4ba3 0%, #2563eb 35%, #e11d48 100%);
-    color: #f9fafb;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-chile::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top left, rgba(255,255,255,0.15), transparent 55%),
-                radial-gradient(circle at bottom right, rgba(255,255,255,0.18), transparent 55%);
-    opacity: 0.8;
-}
-
-.hero-chile .container {
-    position: relative;
-    z-index: 1;
+/* Hero topo */
+.chile-hero {
+  background: linear-gradient(135deg, var(--chile-blue), #2b2d42);
+  color: #ffffff;
+  border-radius: 0 0 2rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .hero-title {
-    font-weight: 700;
-    letter-spacing: 0.02em;
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+}
+
+.hero-title span {
+  color: var(--chile-accent);
 }
 
 .hero-subtitle {
-    opacity: 0.95;
+  font-size: 0.95rem;
+  max-width: 450px;
 }
 
-/* Bandeira do Chile em CSS */
-.chile-flag {
-    width: 140px;
-    height: 90px;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-    border: 3px solid rgba(255,255,255,0.9);
-    background: #fff;
+/* Cartão da bandeira */
+.flag-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1.2rem;
+  padding: 1.2rem;
+  backdrop-filter: blur(8px);
 }
 
-/* Parte inferior vermelha */
-.chile-flag::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 50%;
-    background: #d50000;
+.flag-chile {
+  width: 120px;
+  height: 80px;
+  margin: 0 auto;
+  border-radius: 0.4rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background:
+    linear-gradient(to bottom, #ffffff 50%, var(--chile-red) 50%) 0 0 / 100% 100% no-repeat;
+  position: relative;
 }
 
-/* Quadrado azul */
-.chile-flag::before {
-    content: "★";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 40%;
-    height: 50%;
-    background: #0039a6;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
+/* Quadrado azul da bandeira */
+.flag-chile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 50%;
+  background: var(--chile-blue);
+  border-radius: 0.4rem 0 0 0;
 }
 
-/* ===========================
-   Cards / Glassmorphism
-   =========================== */
-
-.card-glass {
-    background: rgba(255,255,255,0.9);
-    border-radius: 18px;
-    border: 1px solid rgba(148,163,184,0.4);
-    box-shadow:
-        0 18px 40px rgba(15,23,42,0.12),
-        0 0 0 1px rgba(255,255,255,0.4) inset;
-    backdrop-filter: blur(12px);
+/* Estrela branca */
+.flag-chile::after {
+  content: "★";
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  font-size: 1.3rem;
+  color: #ffffff;
 }
 
-.card-link {
-    border-radius: 18px;
-    border: 1px solid rgba(148,163,184,0.4);
-    background: linear-gradient(120deg, rgba(255,255,255,0.95), rgba(219,234,254,0.9));
-    box-shadow: 0 10px 24px rgba(15,23,42,0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+/* Cards principais */
+.card {
+  border-radius: 1.4rem;
 }
 
-.card-link:hover {
-    transform: translateY(-3px);
-    border-color: #2563eb;
-    box-shadow: 0 18px 40px rgba(37,99,235,0.18);
+.card-title {
+  font-weight: 600;
 }
 
-/* Bolinha de ícone */
-.icon-circle {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 1.5rem;
-    background: #0b4ba3;
-    color: #f9fafb;
+/* Badges personalizadas */
+.bg-chile {
+  background: var(--chile-blue);
 }
 
-/* Título de seção */
-.section-title {
-    font-weight: 700;
+.bg-chile-alt {
+  background: var(--chile-red);
 }
 
-/* Estatísticas da meta */
-.meta-stat {
-    padding: 0.5rem 0.75rem;
-    border-radius: 10px;
-    background: rgba(248,250,252,0.9);
-    border: 1px solid rgba(226,232,240,0.9);
+/* Badge dentro do header */
+.card-header .badge {
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  line-height: 1;
 }
 
-/* Progress bar maior */
-.progress-lg {
-    height: 20px;
-    border-radius: 999px;
-    overflow: hidden;
+/* Botões */
+.btn-chile {
+  background: linear-gradient(135deg, var(--chile-red), #ff7f51);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(230, 57, 70, 0.35);
 }
 
-/* Tabela de gastos mais elegante */
-.table thead th {
-    border-top: none;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+.btn-chile:hover {
+  filter: brightness(1.05);
+  color: #ffffff;
 }
 
-.table-hover tbody tr:hover {
-    background: rgba(239,246,255,0.7);
+/* Total card */
+.total-card {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
-/* Botões de ação na tabela */
-.btn-acao {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.78rem;
+/* Barra de progresso */
+.meta-progress {
+  height: 1rem;
+  border-radius: 999px;
+  background-color: #e5e7eb;
 }
 
-/* ===========================
-   Responsividade
-   =========================== */
-
-@media (max-width: 767.98px) {
-    .hero-title {
-        font-size: 1.6rem;
-    }
-    .chile-flag {
-        width: 120px;
-        height: 78px;
-    }
-}
-
-/* Margem mais suave no main */
-main.container {
-    margin-top: 1rem;
-}
-
-/* Footer simples (se quiser adicionar depois)
+/* Footer */
 footer {
-    font-size: 0.85rem;
-    color: #6b7280;
+  margin-top: 1rem;
 }
-*/
+
+/* ============================= */
+/*      RESPONSIVIDADE MOBILE    */
+/* ============================= */
+
+/* até tablets / celulares em pé */
+@media (max-width: 768px) {
+  body {
+    font-size: 0.95rem;
+  }
+
+  /* Hero mais compacto e centralizado */
+  .chile-hero {
+    border-radius: 0 0 1.4rem 1.4rem;
+  }
+
+  .chile-hero .container {
+    padding-top: 1.5rem;
+    padding-bottom: 1.8rem;
+  }
+
+  .chile-hero .row {
+    flex-direction: column-reverse;
+    text-align: center;
+    row-gap: 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.9rem;
+  }
+
+  .hero-subtitle {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .flag-card {
+    margin: 0 auto;
+    padding: 1rem 1.1rem;
+  }
+
+  .flag-chile {
+    width: 100px;
+    height: 66px;
+  }
+
+  /* Cards: menos padding */
+  .card {
+    border-radius: 1.1rem;
+  }
+
+  .card-header {
+    padding: 0.85rem 1rem 0.25rem 1rem;
+  }
+
+  .card-body {
+    padding: 0.9rem 1rem 1.2rem 1rem;
+  }
+
+  /* Tabela de gastos: texto menor e sem quebrar feio */
+  #tabelaGastos th,
+  #tabelaGastos td {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  /* Total card em coluna, fica mais bonito no mobile */
+  .total-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  /* Inputs e botões com tipografia mais leve */
+  .form-label {
+    font-size: 0.8rem;
+  }
+
+  .form-control,
+  .input-group-text,
+  .btn {
+    font-size: 0.9rem;
+  }
+
+  /* Botões do formulário de gastos em coluna quando apertar espaço */
+  #gastoForm .col-12.d-flex {
+    flex-direction: column;
+  }
+
+  #gastoForm .col-12.d-flex .btn {
+    width: 100%;
+  }
+
+  /* Badge cola mais no título sem esmagar layout */
+  .card-header .badge {
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  main.container {
+    padding-top: 1.4rem;
+  }
+}
+
+/* Celulares bem pequenos */
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 1.7rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .card-body {
+    padding: 0.85rem 0.9rem 1.1rem 0.9rem;
+  }
+
+  #tabelaGastos th,
+  #tabelaGastos td {
+    font-size: 0.78rem;
+  }
+
+  .total-card h3 {
+    font-size: 1.1rem;
+  }
+
+  footer {
+    font-size: 0.75rem;
+  }
+}
