@@ -72,6 +72,8 @@ function salvarJuntadoNoLocalStorage() {
 // -------------------------------
 function renderizarTabelaGastos() {
   const tbody = document.querySelector("#tabelaGastos tbody");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
   gastos.forEach((gasto) => {
@@ -134,9 +136,9 @@ function adicionarOuAtualizarGasto(event) {
 
   const descricao = descricaoInput.value.trim();
   const quantidade = parseInt(quantidadeInput.value, 10) || 0;
-  const valorUnitario = parseFloat(
-    (valorUnitarioInput.value || "").toString().replace(",", ".")
-  ) || 0;
+  const valorUnitario =
+    parseFloat((valorUnitarioInput.value || "").toString().replace(",", ".")) ||
+    0;
   const subtotal = quantidade * valorUnitario;
 
   if (!descricao || quantidade <= 0 || valorUnitario < 0) {
@@ -189,12 +191,21 @@ function iniciarEdicaoGasto(id) {
 }
 
 function resetarFormularioGastos() {
-  document.getElementById("gastoForm").reset();
-  document.getElementById("quantidadeGasto").value = 1;
-  document.getElementById("subtotalPreview").value = "";
+  const form = document.getElementById("gastoForm");
+  if (form) form.reset();
+
+  const qtdInput = document.getElementById("quantidadeGasto");
+  const subtotalInput = document.getElementById("subtotalPreview");
+
+  if (qtdInput) qtdInput.value = 1;
+  if (subtotalInput) subtotalInput.value = "";
+
   gastoEmEdicaoId = null;
-  document.getElementById("btnSalvarGasto").textContent = "Adicionar gasto";
-  document.getElementById("btnCancelarEdicao").classList.add("d-none");
+  const btnSalvar = document.getElementById("btnSalvarGasto");
+  const btnCancelar = document.getElementById("btnCancelarEdicao");
+
+  if (btnSalvar) btnSalvar.textContent = "Adicionar gasto";
+  if (btnCancelar) btnCancelar.classList.add("d-none");
 }
 
 function removerGasto(id) {
@@ -208,21 +219,29 @@ function removerGasto(id) {
 // Atualiza o total geral dos gastos
 function atualizarTotalGastos() {
   const total = gastos.reduce((soma, g) => soma + g.subtotal, 0);
-  document.getElementById("totalGastos").textContent = formatarMoeda(total);
+  const totalEl = document.getElementById("totalGastos");
+  if (totalEl) {
+    totalEl.textContent = formatarMoeda(total);
+  }
 }
 
 // Atualiza o preview de subtotal no formulário de gasto
 function atualizarSubtotalPreview() {
-  const qtd = parseInt(document.getElementById("quantidadeGasto").value, 10) || 0;
-  const valorUnit = parseFloat(
-    (document.getElementById("valorUnitarioGasto").value || "")
-      .toString()
-      .replace(",", ".")
-  ) || 0;
-  const subtotal = qtd * valorUnit;
+  const qtd =
+    parseInt(document.getElementById("quantidadeGasto")?.value, 10) || 0;
+  const valorUnit =
+    parseFloat(
+      (document.getElementById("valorUnitarioGasto")?.value || "")
+        .toString()
+        .replace(",", ".")
+    ) || 0;
 
-  document.getElementById("subtotalPreview").value =
-    subtotal > 0 ? formatarMoeda(subtotal) : "";
+  const subtotal = qtd * valorUnit;
+  const subtotalInput = document.getElementById("subtotalPreview");
+
+  if (subtotalInput) {
+    subtotalInput.value = subtotal > 0 ? formatarMoeda(subtotal) : "";
+  }
 }
 
 // -------------------------------
@@ -232,31 +251,45 @@ async function atualizarCotacaoCLP() {
   const valorEl = document.getElementById("valorCLP");
   const atualizadoEl = document.getElementById("atualizadoEm");
 
+  if (!valorEl || !atualizadoEl) {
+    console.warn(
+      "Elementos de cotação (valorCLP / atualizadoEm) não encontrados no HTML."
+    );
+    return;
+  }
+
   try {
     valorEl.textContent = "Carregando...";
 
-    const url = "https://api.exchangerate.host/latest?base=BRL&symbols=CLP";
+    // API free, sem chave, BRL como base
+    const url = "https://open.er-api.com/v6/latest/BRL";
     const resposta = await fetch(url);
+
+    if (!resposta.ok) {
+      throw new Error("HTTP " + resposta.status);
+    }
+
     const dados = await resposta.json();
+    console.log("Dados da API de câmbio:", dados);
 
-    const clp = dados?.rates?.CLP;
-
-    if (!clp) {
+    // Estrutura esperada: { result: "success", rates: { CLP: 1234.56, ... } }
+    if (dados.result !== "success" || !dados.rates || typeof dados.rates.CLP !== "number") {
       valorEl.textContent = "Erro ao carregar";
       return;
     }
 
-    valorEl.textContent = `${clp.toFixed(2)} CLP`;
+    const clp = dados.rates.CLP;
+
+    valorEl.textContent = clp.toFixed(2) + " CLP";
 
     const agora = new Date();
     atualizadoEl.textContent =
-      "Última atualização: " + agora.toLocaleTimeString("pt-BR");
-
+      "Última atualização: " + agora.toLocaleString("pt-BR");
   } catch (e) {
+    console.error("Erro ao buscar cotação:", e);
     valorEl.textContent = "Falha na API";
   }
 }
-
 
 // -------------------------------
 // Meta de economia
@@ -297,11 +330,9 @@ function atualizarResumoMeta() {
   }
 
   if (juntado <= 0) {
-    mensagemEl.textContent =
-      "Ainda não começamos a juntar :(";
+    mensagemEl.textContent = "Ainda não começamos a juntar :(";
   } else if (juntado < meta) {
-    mensagemEl.textContent =
-      "Começamos!! foguete não tem ré";
+    mensagemEl.textContent = "Começamos!! foguete não tem ré";
   } else if (juntado === meta) {
     mensagemEl.textContent =
       "BATEU A META CARAI!!!!!!!!!!!!!!! VAMOOOOOO";
@@ -318,11 +349,9 @@ function atualizarResumoMeta() {
       faltaFormatado
     )} para alcançar a meta.`;
   } else {
-    quantoFaltaEl.textContent =
-      "Meta alcançada!!!!!!!";
+    quantoFaltaEl.textContent = "Meta alcançada!!!!!!!";
   }
 }
-
 
 // -------------------------------
 // Eventos da meta
@@ -331,15 +360,19 @@ function configurarEventosMeta() {
   const btnMeta = document.getElementById("btnSalvarMeta");
   const btnJuntado = document.getElementById("btnSalvarJuntado");
 
-  btnMeta.addEventListener("click", () => {
-    salvarMetaNoLocalStorage();
-    atualizarResumoMeta();
-  });
+  if (btnMeta) {
+    btnMeta.addEventListener("click", () => {
+      salvarMetaNoLocalStorage();
+      atualizarResumoMeta();
+    });
+  }
 
-  btnJuntado.addEventListener("click", () => {
-    salvarJuntadoNoLocalStorage();
-    atualizarResumoMeta();
-  });
+  if (btnJuntado) {
+    btnJuntado.addEventListener("click", () => {
+      salvarJuntadoNoLocalStorage();
+      atualizarResumoMeta();
+    });
+  }
 }
 
 // -------------------------------
@@ -348,14 +381,13 @@ function configurarEventosMeta() {
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Chile 2026 – painel carregado ✅");
 
+  // Cotação do CLP
+  atualizarCotacaoCLP();
+  const btnCotacao = document.getElementById("btnAtualizarCLP");
+  if (btnCotacao) {
+    btnCotacao.addEventListener("click", atualizarCotacaoCLP);
+  }
 
-// Cotação do CLP
-atualizarCotacaoCLP();
-document
-  .getElementById("btnAtualizarCLP")
-  .addEventListener("click", atualizarCotacaoCLP);
-
-  
   // Carrega dados salvos
   carregarDoLocalStorage();
 
@@ -367,19 +399,25 @@ document
 
   // Eventos do formulário de gasto
   const formGasto = document.getElementById("gastoForm");
-  formGasto.addEventListener("submit", adicionarOuAtualizarGasto);
+  if (formGasto) {
+    formGasto.addEventListener("submit", adicionarOuAtualizarGasto);
+  }
 
-  document
-    .getElementById("quantidadeGasto")
-    .addEventListener("input", atualizarSubtotalPreview);
-  document
-    .getElementById("valorUnitarioGasto")
-    .addEventListener("input", atualizarSubtotalPreview);
+  const qtdInput = document.getElementById("quantidadeGasto");
+  const valorUnitInput = document.getElementById("valorUnitarioGasto");
+
+  if (qtdInput) {
+    qtdInput.addEventListener("input", atualizarSubtotalPreview);
+  }
+  if (valorUnitInput) {
+    valorUnitInput.addEventListener("input", atualizarSubtotalPreview);
+  }
 
   // Botão cancelar edição
-  document
-    .getElementById("btnCancelarEdicao")
-    .addEventListener("click", resetarFormularioGastos);
+  const btnCancelar = document.getElementById("btnCancelarEdicao");
+  if (btnCancelar) {
+    btnCancelar.addEventListener("click", resetarFormularioGastos);
+  }
 
   // Eventos da meta
   configurarEventosMeta();
