@@ -226,6 +226,39 @@ function atualizarSubtotalPreview() {
 }
 
 // -------------------------------
+// Cotação do Peso Chileno (CLP)
+// -------------------------------
+async function atualizarCotacaoCLP() {
+  const valorEl = document.getElementById("valorCLP");
+  const atualizadoEl = document.getElementById("atualizadoEm");
+
+  try {
+    valorEl.textContent = "Carregando...";
+
+    const url = "https://api.exchangerate.host/latest?base=BRL&symbols=CLP";
+    const resposta = await fetch(url);
+    const dados = await resposta.json();
+
+    const clp = dados?.rates?.CLP;
+
+    if (!clp) {
+      valorEl.textContent = "Erro ao carregar";
+      return;
+    }
+
+    valorEl.textContent = `${clp.toFixed(2)} CLP`;
+
+    const agora = new Date();
+    atualizadoEl.textContent =
+      "Última atualização: " + agora.toLocaleTimeString("pt-BR");
+
+  } catch (e) {
+    valorEl.textContent = "Falha na API";
+  }
+}
+
+
+// -------------------------------
 // Meta de economia
 // -------------------------------
 function atualizarResumoMeta() {
@@ -315,6 +348,14 @@ function configurarEventosMeta() {
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Chile 2026 – painel carregado ✅");
 
+
+// Cotação do CLP
+atualizarCotacaoCLP();
+document
+  .getElementById("btnAtualizarCLP")
+  .addEventListener("click", atualizarCotacaoCLP);
+
+  
   // Carrega dados salvos
   carregarDoLocalStorage();
 
