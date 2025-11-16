@@ -31,7 +31,7 @@
           <h1 class="hero-title">Viagem ao <span>Chile</span> 2026</h1>
           <p class="hero-subtitle">
             Feito para planejarmos nossas economias!
-        </p>
+          </p>
         </div>
 
         <div class="col-md-4 text-center">
@@ -51,16 +51,17 @@
   <main class="container pb-5">
     <div class="row g-4">
 
-<!-- GASTOS -->
-<div class="col-lg-7">
-  <section class="card shadow-lg border-0 h-100">
+      <!-- GASTOS -->
+      <div class="col-lg-7">
+        <section class="card shadow-lg border-0 h-100">
 
-    <div class="card-header border-0 bg-transparent pb-0 d-flex justify-content-between align-items-center">
-      <div>
-        <h2 class="card-title mb-0">Gastos da Viagem</h2>
-      </div>
-      <span class="badge bg-chile">Planejamento</span>
-    </div>
+          <div class="card-header border-0 bg-transparent pb-0 d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="card-title mb-0">Gastos da Viagem</h2>
+            </div>
+            <span class="badge bg-chile">Planejamento</span>
+          </div>
+
           <div class="card-body">
 
             <!-- FORMULARIO -->
@@ -119,54 +120,54 @@
                 <p class="small mb-0 text-uppercase text-muted">Custo total previsto</p>
                 <h3 id="totalGastos" class="mb-0">R$ 0,00</h3>
               </div>
-
             </div>
 
           </div>
         </section>
       </div>
 
-      <!-- COTAÇÃO DO PESO CHILENO -->
-<div class="col-lg-5">
-  <section class="card shadow-lg border-0 h-100 mb-3">
+      <!-- COLUNA DIREITA:
+           COTAÇÃO + META DE ECONOMIA EMPILHADAS -->
+      <div class="col-lg-5 d-flex flex-column gap-3">
 
-    <div class="card-header border-0 bg-transparent pb-0 d-flex justify-content-between align-items-center">
-      <div>
-        <h2 class="card-title mb-0">Cotação do Peso Chileno</h2>
-      </div>
-      <span class="badge bg-chile-alt">CLP Hoje</span>
-    </div>
+        <!-- COTAÇÃO DO PESO CHILENO -->
+        <section class="card shadow-lg border-0">
 
-    <div class="card-body">
-      <p class="text-muted small mb-1">1 Real vale atualmente:</p>
+          <div class="card-header border-0 bg-transparent pb-0 d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="card-title mb-0">Cotação do Peso Chileno</h2>
+            </div>
+            <span class="badge bg-chile-alt">CLP Hoje</span>
+          </div>
 
-      <div class="d-flex align-items-center gap-3">
-        <h3 id="valorCLP" class="mb-0 fw-bold">Carregando...</h3>
-      </div>
+          <div class="card-body">
+            <p class="text-muted small mb-1">1 Real vale atualmente:</p>
 
-      <button class="btn btn-outline-primary mt-3 w-100" id="btnAtualizarCLP">
-        Atualizar cotação
-      </button>
+            <div class="d-flex align-items-center gap-3">
+              <h3 id="valorCLP" class="mb-0 fw-bold">Carregando...</h3>
+            </div>
 
-      <p class="small mt-2 text-muted" id="atualizadoEm">
-        Última atualização: —
-      </p>
-    </div>
+            <button class="btn btn-outline-primary mt-3 w-100" id="btnAtualizarCLP">
+              Atualizar cotação
+            </button>
 
-  </section>
-</div>
+            <p class="small mt-2 text-muted" id="atualizadoEm">
+              Última atualização: —
+            </p>
+          </div>
 
+        </section>
 
-<!-- META DE ECONOMIA -->
-<div class="col-lg-5">
-  <section class="card shadow-lg border-0 h-100">
+        <!-- META DE ECONOMIA -->
+        <section class="card shadow-lg border-0">
 
-    <div class="card-header border-0 bg-transparent pb-0 d-flex justify-content-between align-items-center">
-      <div>
-        <h2 class="card-title mb-0">Meta de Economia</h2>
-      </div>
-      <span class="badge bg-chile-alt">Economia</span>
-    </div>
+          <div class="card-header border-0 bg-transparent pb-0 d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="card-title mb-0">Meta de Economia</h2>
+            </div>
+            <span class="badge bg-chile-alt">Economia</span>
+          </div>
+
           <div class="card-body">
 
             <!-- META TOTAL -->
@@ -193,13 +194,15 @@
               </div>
 
               <div class="progress meta-progress mt-1">
-                <div class="progress-bar progress-bar-striped progress-bar-animated"
-                    id="barraProgresso"
-                    role="progressbar"
-                    style="width: 0%"
-                    aria-valuenow="0"
-                    aria-valuemin="0"
-                    aria-valuemax="100"></div>
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated"
+                  id="barraProgresso"
+                  role="progressbar"
+                  style="width: 0%"
+                  aria-valuenow="0"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
               </div>
             </div>
 
@@ -215,13 +218,12 @@
             </div>
 
           </div>
-
         </section>
-      </div>
+
+      </div> <!-- fim da coluna direita -->
 
     </div>
   </main>
-
 
   <!-- JS -->
   <script src="script.js"></script>
